@@ -1,4 +1,4 @@
 # lazy-nft
 .npm i    
-.deploy on localhost
+.deploy on localhost  
 . npm run dev
