@@ -1,4 +1,5 @@
 # lazy-nft
 .npm i    
-.deploy on localhost  
+.npx hardhat node   
+.npx hardhat run scripts/deploy.js --network localhost  
 . npm run dev
