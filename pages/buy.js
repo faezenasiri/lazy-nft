@@ -5,6 +5,7 @@ import Web3Modal from "web3modal"
 
 
 
+
 import Lazy from '../artifacts/contracts/Lazy.sol/Lazy.json'
 
 
@@ -15,10 +16,34 @@ import {
 
 
 export default function Home() {
+
+
+
   const [nfts, setNfts] = useState([])
   const [loadingState, setLoadingState] = useState('not-loaded')
   useEffect(() => {
-    loadNFTs()
+
+loadNFTs()
+
+
+
+
+const chainId = 4 // Polygon Mainnet
+const x = window.ethereum.networkVersion 
+if (x == chainId ) {
+       {
+        console.log(window.ethereum.networkVersion)
+       
+     console.log(window.ethereum.networkVersion)
+      } 
+      
+          // This error code indicates that the chain has not been added to MetaMask      
+    }
+    else {
+      alert("connect to rinkeby")
+    }
+
+    
   }, [])
   let data 
   async function loadNFTs() {
@@ -69,6 +94,19 @@ export default function Home() {
     await transaction.wait()
     loadNFTs()
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
   if (loadingState === 'loaded' && !nfts.length) return (<h1 className="px-20 py-10 text-3xl">No items in marketplace</h1>)
   return (
     <div>
