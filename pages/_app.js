@@ -1,6 +1,5 @@
 import '../styles/globals.css'
-import Link from 'next/link'
-import Profile from '../component/profile'
+
 
 
 function Marketplace({ Component, pageProps }) {

@@ -95,7 +95,7 @@ async function sign(TokenId , Minprice , Uri ) {
           {
             name: 'Name',
             version: '1.0.0',
-            chainId: 1337,
+            chainId: 4,
             verifyingContract: "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc",
           },
           // Types
