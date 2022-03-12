@@ -72,6 +72,7 @@ export default function CreateItem() {
     } catch (error) {
       console.log('Error uploading file: ', error)
     }  
+    router.push('/buy')
   }
 
 
@@ -82,7 +83,8 @@ export default function CreateItem() {
 
 async function sign(TokenId , Minprice , Uri ) {
     let tokenId = TokenId
-    let minPrice = Minprice
+    let minPrice = Minprice*1000
+    console.log(minPrice)
     let uri = Uri
     const web3Modal = new Web3Modal()
     const connection = await web3Modal.connect()
