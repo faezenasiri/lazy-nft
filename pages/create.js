@@ -99,18 +99,18 @@ async function sign(TokenId , Minprice , Uri ) {
             name: 'Name',
             version: '1.0.0',
             chainId: 4,
-            verifyingContract: "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc",
+            verifyingContract: "0xcc04e08B16f78c65b83DcCaEC56Fa082912AAD23",
           },
           // Types
           {
             NFTVoucher: [
         {name: "tokenId", type: "uint256"},
         {name: "minPrice", type: "uint256"},
-        {name: "uri", type: "string"}, 
+  
             ],
           },
           // Value
-          { tokenId, minPrice, uri },
+          { tokenId, minPrice},
         );
         return   signature
         }

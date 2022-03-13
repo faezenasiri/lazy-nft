@@ -88,7 +88,7 @@ if (x == chainId ) {
     console.log(nft.price)
 
     const sig = nft.sig
-    const transaction = await contract.redeem(addr,{tokenId:nft.tokenId ,minPrice:price2, uri:nft.tokenUri},sig, {
+    const transaction = await contract.redeem(addr,nft.tokenId ,price2,sig, {
       value: price
     })
     await transaction.wait()
