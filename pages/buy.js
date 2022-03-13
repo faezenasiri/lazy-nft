@@ -84,11 +84,14 @@ if (x == chainId ) {
     const price = ethers.utils.parseUnits(nft.price.toString(),'ether')
     const price2 = ethers.utils.parseUnits(nft.price.toString(),'gwei')
 
+    let tokenId = nft.tokenId 
+    let minPrice = price2
+    let uri = nft.tokenUri
     
     console.log(nft.price)
 
     const sig = nft.sig
-    const transaction = await contract.redeem(addr,nft.tokenId ,price2,sig, {
+     const transaction = await contract.redeem(addr,{tokenId ,minPrice ,uri},sig, {
       value: price
     })
     await transaction.wait()

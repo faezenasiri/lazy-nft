@@ -17,30 +17,40 @@ contract Lazy is ERC721URIStorage, EIP712, AccessControl {
 
     constructor() ERC721("LazyNFT", "LAZ") EIP712("Name", "1.0.0") {}
 
+    /// @notice Represents an un-minted NFT, which has not yet been recorded into the blockchain. A signed voucher can be redeemed for a real NFT using the redeem function.
+    struct NFTVoucher {
+        /// @notice The id of the token to be redeemed. Must be unique - if another token with this ID already exists, the redeem function will revert.
+        uint256 tokenId;
+        /// @notice The minimum price (in wei) that the NFT creator is willing to accept for the initial sale of this NFT.
+        uint256 minPrice;
+        /// @notice The metadata URI to associate with this token.
+        string uri;
+    }
+
     function redeem(
         address redeemer,
-        uint256 tokenId,
-        uint256 minPrice,
+        NFTVoucher calldata voucher,
         bytes memory signature
     ) public payable returns (uint256) {
         // make sure signature is valid and get the address of the signer
-        address signer = _verify(tokenId, minPrice, signature);
+        address signer = _verify(voucher, signature);
 
         // make sure that the signer is authorized to mint NFTs
 
         // make sure that the redeemer is paying enough to cover the buyer's cost
-        require(msg.value >= minPrice, "Insufficient funds to redeem");
+        require(msg.value >= voucher.minPrice, "Insufficient funds to redeem");
 
         // first assign the token to the signer, to establish provenance on-chain
-        _mint(signer, tokenId);
+        _mint(signer, voucher.tokenId);
+        _setTokenURI(voucher.tokenId, voucher.uri);
 
         // transfer the token to the redeemer
-        _transfer(signer, redeemer, tokenId);
+        _transfer(signer, redeemer, voucher.tokenId);
 
         // record payment to signer's withdrawal balance
         pendingWithdrawals[signer] += msg.value;
 
-        return tokenId;
+        return voucher.tokenId;
     }
 
     function withdraw() public {
@@ -57,7 +67,9 @@ contract Lazy is ERC721URIStorage, EIP712, AccessControl {
         return pendingWithdrawals[msg.sender];
     }
 
-    function _hash(uint256 tokenId, uint256 minPrice)
+    /// @notice Returns a hash of the given NFTVoucher, prepared using EIP712 typed data hashing rules.
+    /// @param voucher An NFTVoucher to hash.
+    function _hash(NFTVoucher calldata voucher)
         internal
         view
         returns (bytes32)
@@ -67,23 +79,27 @@ contract Lazy is ERC721URIStorage, EIP712, AccessControl {
                 keccak256(
                     abi.encode(
                         keccak256(
-                            "NFTVoucher(uint256 tokenId,uint256 minPrice)"
+                            "NFTVoucher(uint256 tokenId,uint256 minPrice,string uri)"
                         ),
-                        tokenId,
-                        minPrice
+                        voucher.tokenId,
+                        voucher.minPrice,
+                        keccak256(bytes(voucher.uri))
                     )
                 )
             );
     }
 
-    function _verify(
-        uint256 tokenId,
-        uint256 minPrice,
-        bytes memory signature
-    ) internal view returns (address) {
-        bytes32 digest = _hash(tokenId, minPrice);
+    /// @notice Verifies the signature for a given NFTVoucher, returning the address of the signer.
+    /// @dev Will revert if the signature is invalid. Does not verify that the signer is authorized to mint NFTs.
+    /// @param voucher An NFTVoucher describing an unminted NFT.
+    /// @param signature An EIP712 signature of the given voucher.
+    function _verify(NFTVoucher calldata voucher, bytes memory signature)
+        internal
+        view
+        returns (address)
+    {
+        bytes32 digest = _hash(voucher);
         address fu = ECDSA.recover(digest, signature);
-
         return fu;
     }
 
