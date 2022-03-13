@@ -83,7 +83,8 @@ export default function CreateItem() {
 
 async function sign(TokenId , Minprice , Uri ) {
     let tokenId = TokenId
-    let minPrice = Minprice*1000
+    
+    const minPrice = ethers.utils.parseUnits(Minprice.toString(),'gwei')
     console.log(minPrice)
     let uri = Uri
     const web3Modal = new Web3Modal()

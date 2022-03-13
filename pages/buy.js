@@ -82,13 +82,13 @@ if (x == chainId ) {
     console.log(addr)
     const contract = new ethers.Contract(Lazyaddr, Lazy.abi, signer)
     const price = ethers.utils.parseUnits(nft.price.toString(),'ether')
-    const price2 = nft.price*10**18
+    const price2 = ethers.utils.parseUnits(nft.price.toString(),'gwei')
 
     
     console.log(nft.price)
 
     const sig = nft.sig
-    const transaction = await contract.redeem(addr,{tokenId:nft.tokenId ,minPrice:nft.price*1000, uri:nft.tokenUri},sig, {
+    const transaction = await contract.redeem(addr,{tokenId:nft.tokenId ,minPrice:price2, uri:nft.tokenUri},sig, {
       value: price
     })
     await transaction.wait()
