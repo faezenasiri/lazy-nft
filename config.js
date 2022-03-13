@@ -1,0 +1,1 @@
+  export const Lazyaddr = "0x8A3988fA1c3a915711C40427CFA87D227443E8Ce"
