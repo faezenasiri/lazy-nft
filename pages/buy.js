@@ -54,11 +54,15 @@ if (x == chainId ) {
     
     
     const items = await Promise.all(data.map(async i => {
+      const id = i.id
       const tokenUri = i.url
       const sig = i.sig
+      const sold = i.sold
       const tokenId = i.tokenId
       const meta = await axios.get(tokenUri)
       let item = {
+        sold,
+        id,
         tokenUri,
         tokenId,
         sig,
@@ -69,8 +73,10 @@ if (x == chainId ) {
       return item
     }))
     setNfts(items)
-    setLoadingState('loaded') 
+  
   }
+
+
 
   async function buyNft(nft) {
     const web3Modal = new Web3Modal()
@@ -80,6 +86,9 @@ if (x == chainId ) {
     const addr = await signer.getAddress()
 
     console.log(addr)
+ 
+
+
     const contract = new ethers.Contract(Lazyaddr, Lazy.abi, signer)
     const price = ethers.utils.parseUnits(nft.price.toString(),'ether')
     const price2 = ethers.utils.parseUnits(nft.price.toString(),'gwei')
@@ -88,13 +97,31 @@ if (x == chainId ) {
     let minPrice = price2
     let uri = nft.tokenUri
     
-    console.log(nft.price)
+    console.log(nft.sold)
 
     const sig = nft.sig
      const transaction = await contract.redeem(addr,{tokenId ,minPrice ,uri},sig, {
       value: price
     })
     await transaction.wait()
+
+    const baseURL = `http://127.0.0.1:8000/api/Nfts/${nft.id}/`;
+    let Name = nft.name
+    let URL = nft.tokenUri
+    let ID = nft.tokenId
+    const note = {
+      
+       tokenId : ID,
+       name : Name,
+       sig :addr,
+       url :URL,
+       sold : true
+    
+      }   
+      axios.put(baseURL, note)
+
+
+
     loadNFTs()
   }
 
@@ -131,17 +158,22 @@ if (x == chainId ) {
                
 
                 </div>
+               
                   <div className="p-4">
                   
                     <a style={{ height: '64px' }} className="text-2xl font-semibold"><p>{nft.name}</p></a>
                      
                  
                   </div>
-                  <div className="p-4 bg-black">
+
+                 {!nft.sold && <div className="p-4 bg-black">
                     <p className="text-2xl mb-4 font-bold text-white">{nft.price} ETH</p>
                     
                     <button className="w-full bg-pink-500 text-white font-bold py-2 px-12 rounded" onClick={() => buyNft(nft)}>Buy</button>
-                  </div>
+                  </div>}
+                  {nft.sold && <div className="p-4 bg-black">
+                    <p className=" text-white">owner: {nft.sig} </p>    
+                  </div>}
                 </div>
               ))
           }
