@@ -4,12 +4,12 @@ const fs = require('fs');
 async function main() {
   
 
-  const Lazy = await hre.ethers.getContractFactory("Lazy");
-  const LAZY = await Lazy.deploy();
-  await LAZY.deployed();
-  console.log("lazy deployed to:", LAZY.address);
 
 
+  const Lazy1155 = await hre.ethers.getContractFactory("Lazy1155");
+  const LAZY1155 = await Lazy1155.deploy();
+  await LAZY1155.deployed();
+  console.log("lazy deployed to:", LAZY1155.address);
   
 }
 

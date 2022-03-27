@@ -21,6 +21,17 @@ function Marketplace({ Component, pageProps }) {
             </a>
           </Link>
 
+          <Link href="/create1155">
+            <a className="mr-6 text-pink-500">
+              Create1155
+            </a>
+          </Link>
+          <Link href="/buy1155">
+            <a className="mr-6 text-pink-500">
+              Buy1155
+            </a>
+          </Link>
+
         </div>
       </nav>
  
