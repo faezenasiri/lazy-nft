@@ -9,6 +9,8 @@ class Nft(models.Model):
     sig = models.TextField(default='a')
     url = models.TextField(default='a')
     sold = models.BooleanField(default=True)
+    amount = models.IntegerField(default=1)
+    erc1155 = models.BooleanField(default=False)
 
     def _str_(self):
         return self.name

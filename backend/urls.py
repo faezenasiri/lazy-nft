@@ -9,4 +9,5 @@ router.register(r'Nfts', views.TodoView, 'Nft')
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    path('nfts/<int:tokenId>/', views.TodoView.as_view),
 ]
