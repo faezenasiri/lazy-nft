@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract Lazy1155 is EIP712, ERC1155 {
     using ECDSA for bytes32;
@@ -21,14 +22,9 @@ contract Lazy1155 is EIP712, ERC1155 {
         symbol = "nft";
     }
 
-    /// @notice Represents an un-minted NFT, which has not yet been recorded into the blockchain. A signed voucher can be redeemed for a real NFT using the redeem function.
     struct NFTVoucher {
-        /// @notice The id of the token to be redeemed. Must be unique - if another token with this ID already exists, the redeem function will revert.
         uint256 tokenId;
-        /// @notice The minimum price (in wei) that the NFT creator is willing to accept for the initial sale of this NFT.
         uint256 minPrice;
-        /// @notice The metadata URI to associate with this token.
-
         uint256 amount;
         string uri;
     }
@@ -38,19 +34,10 @@ contract Lazy1155 is EIP712, ERC1155 {
         NFTVoucher calldata voucher,
         bytes memory signature
     ) public payable returns (uint256) {
-        // make sure signature is valid and get the address of the signer
         address signer = _verify(voucher, signature);
-
-        // make sure that the signer is authorized to mint NFTs
-
-        // make sure that the redeemer is paying enough to cover the buyer's cost
         require(msg.value >= voucher.minPrice, "Insufficient funds to redeem");
-
-        // first assign the token to the signer, to establish provenance on-chain
-
         _mint(signer, voucher.tokenId, voucher.amount, "");
         setURI(voucher.tokenId, voucher.uri);
-        // transfer the token to the redeemer
         _safeTransferFrom(
             signer,
             redeemer,
@@ -58,8 +45,6 @@ contract Lazy1155 is EIP712, ERC1155 {
             voucher.amount,
             ""
         );
-
-        // record payment to signer's withdrawal balance
         pendingWithdrawals[signer] += msg.value;
 
         return voucher.tokenId;
@@ -79,8 +64,6 @@ contract Lazy1155 is EIP712, ERC1155 {
         return pendingWithdrawals[msg.sender];
     }
 
-    /// @notice Returns a hash of the given NFTVoucher, prepared using EIP712 typed data hashing rules.
-    /// @param voucher An NFTVoucher to hash.
     function _hash(NFTVoucher calldata voucher)
         internal
         view
@@ -102,10 +85,6 @@ contract Lazy1155 is EIP712, ERC1155 {
             );
     }
 
-    /// @notice Verifies the signature for a given NFTVoucher, returning the address of the signer.
-    /// @dev Will revert if the signature is invalid. Does not verify that the signer is authorized to mint NFTs.
-    /// @param voucher An NFTVoucher describing an unminted NFT.
-    /// @param signature An EIP712 signature of the given voucher.
     function _verify(NFTVoucher calldata voucher, bytes memory signature)
         internal
         view
@@ -116,22 +95,51 @@ contract Lazy1155 is EIP712, ERC1155 {
         return fu;
     }
 
-    function setURI(uint256 _id, string memory _uri) public {
+    function setURI(uint256 _id, string memory _uri) internal {
         tokenURI[_id] = _uri;
-        emit URI(_uri, _id);
     }
 
     function uri(uint256 _id) public view override returns (string memory) {
         return tokenURI[_id];
     }
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override(ERC1155)
-        returns (bool)
-    {
-        return ERC1155.supportsInterface(interfaceId);
+    function mint(
+        uint256 tokenId,
+        uint256 amount,
+        string memory url
+    ) public {
+        _mint(_msgSender(), tokenId, amount, "");
+        setURI(tokenId, url);
+    }
+
+    //start marketplace
+
+    mapping(uint256 => uint256) internal idtoprice;
+    mapping(uint256 => address) internal idtoseller;
+
+    function createitem(uint256 _id, uint256 price) public {
+        idtoprice[_id] = price;
+        safeTransferFrom(
+            _msgSender(),
+            address(this),
+            _id,
+            balanceOf(_msgSender(), _id),
+            ""
+        );
+        idtoseller[_id] = _msgSender();
+    }
+
+    function buyitem(uint256 _id) public payable {
+        require(msg.value >= idtoprice[_id], "Insufficient funds ");
+
+        safeTransferFrom(
+            _msgSender(),
+            address(this),
+            _id,
+            balanceOf(_msgSender(), _id),
+            ""
+        );
+
+        pendingWithdrawals[idtoseller[_id]] += msg.value;
     }
 }

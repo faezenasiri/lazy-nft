@@ -8,10 +8,8 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 
-contract Lazy is ERC721URIStorage, EIP712, AccessControl {
+contract Lazy is ERC721URIStorage, EIP712 {
     using ECDSA for bytes32;
-
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     mapping(address => uint256) pendingWithdrawals;
 
@@ -103,15 +101,18 @@ contract Lazy is ERC721URIStorage, EIP712, AccessControl {
         return fu;
     }
 
+    function mint(uint256 tokenId, string memory url) public {
+        _mint(_msgSender(), tokenId);
+        _setTokenURI(tokenId, url);
+    }
+
     function supportsInterface(bytes4 interfaceId)
         public
         view
         virtual
-        override(AccessControl, ERC721)
+        override(ERC721)
         returns (bool)
     {
-        return
-            ERC721.supportsInterface(interfaceId) ||
-            AccessControl.supportsInterface(interfaceId);
+        return ERC721.supportsInterface(interfaceId);
     }
 }

@@ -1,4 +1,4 @@
-  export const Lazyaddr = "0x1f714beC927CF8a082516bC5d6555116497355c3"
-    export const Lazyaddr1155 = "0x4B01E162587F30a962E992332063F36ec86eE391"
 
+  export const ERC1155addr = "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+ export const ERC1155Marketaddr = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
   
