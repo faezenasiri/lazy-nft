@@ -89,9 +89,9 @@ export default function CreateItem() {
 if (!d) {
       transaction = await contract.aprovalMarketPlacesForAccount()
       tx = await transaction.wait()
-}
-console.log(d)
 
+      
+}
 
    
 
@@ -104,9 +104,24 @@ console.log(d)
 
     /* sending data to backend nftid idstr cat */
 
+
+
     transaction = await contract.createMarketItem( tokenId, price,formInput.amount)
     tx=await transaction.wait()
-        
+          const baseURL = "http://127.0.0.1:8000/api/Nfts1155/";
+    const note = {
+      
+       tokenId : tokenId,
+       name : formInput.name,
+       url : url,
+       sold :false,
+       amount :formInput.amount,
+       amountLeft : formInput.amount,
+       royaltyPercentage :formInput.royalty
+    
+      }   
+      axios.post(baseURL, note)
+           
 
   }
 

@@ -191,7 +191,7 @@ contract NewERC1155Market is ERC1155Holder, ReentrancyGuard, Ownable, EIP712 {
         uint256 _tokenId = marketItem.tokenId;
         uint256 amountleft = marketItem.amount - amount;
 
-        require(msg.value == price, "You should include the price of the item");
+        require(msg.value >= price, "You should include the price of the item");
         require(amountleft >= 0, "supply not enough");
 
         require(
@@ -301,11 +301,6 @@ contract NewERC1155Market is ERC1155Holder, ReentrancyGuard, Ownable, EIP712 {
         bytes memory signature,
         uint256 amount
     ) external payable {
-        require(
-            msg.value == voucher.minPrice * amount,
-            "Insufficient funds to redeem"
-        );
-
         (uint256 id, address signer) = ERC1155lazyContract.mintandApproveMarket(
             voucher,
             signature
