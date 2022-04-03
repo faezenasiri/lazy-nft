@@ -5,15 +5,18 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Burnable.sol";
 import "./ERC2981/IERC2981.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 
-contract NewERC1155lazy is Ownable, ERC1155Burnable, IERC2981 {
+contract NewERC1155lazy is Ownable, ERC1155Burnable, IERC2981, EIP712 {
     string public name;
     string public symbol;
     using Counters for Counters.Counter;
+    using ECDSA for bytes32;
 
     Counters.Counter internal _tokenIds;
 
-    constructor() ERC1155("") {
+    constructor() ERC1155("") EIP712("Name", "1.0.0") {
         name = "nft";
         symbol = "nft";
     }
@@ -27,6 +30,14 @@ contract NewERC1155lazy is Ownable, ERC1155Burnable, IERC2981 {
     struct Royalty {
         address receiver;
         uint256 percentage;
+    }
+
+    struct NFTVoucher {
+        uint256 tokenId;
+        uint256 minPrice;
+        uint256 amount;
+        string uri;
+        uint256 royaltyPercentage;
     }
     mapping(uint256 => Royalty) internal royalties;
 
@@ -62,10 +73,6 @@ contract NewERC1155lazy is Ownable, ERC1155Burnable, IERC2981 {
         return (isApprovedForAll(msg.sender, Marketplace));
     }
 
-    function setURI(string memory newuri) public onlyOwner {
-        _setURI(newuri);
-    }
-
     function uri(uint256 _id) public view override returns (string memory) {
         return tokenURI[_id];
     }
@@ -75,6 +82,7 @@ contract NewERC1155lazy is Ownable, ERC1155Burnable, IERC2981 {
         string memory url,
         uint256 royaltyPercentage
     ) external {
+        _tokenIds.increment();
         uint256 id = _tokenIds.current();
         _mint(_msgSender(), id, amount, "");
         tokenURI[id] = url;
@@ -167,5 +175,60 @@ contract NewERC1155lazy is Ownable, ERC1155Burnable, IERC2981 {
             return true;
         }
         return super.supportsInterface(interfaceId);
+    }
+
+    function mintandApproveMarket(
+        NFTVoucher calldata voucher,
+        bytes memory signature
+    ) public returns (uint256, address) {
+        address signer = _verify(voucher, signature);
+        _tokenIds.increment();
+        uint256 id = _tokenIds.current();
+        _mint(signer, id, voucher.amount, "");
+        tokenURI[id] = voucher.uri;
+        _setRoyalty(id, signer, voucher.royaltyPercentage);
+
+        emit TokenCreated(
+            _msgSender(),
+            id,
+            voucher.uri,
+            voucher.amount,
+            voucher.royaltyPercentage
+        );
+        _safeTransferFrom(signer, Marketplace, id, voucher.amount, "");
+
+        return (id, signer);
+    }
+
+    function _hash(NFTVoucher calldata voucher)
+        internal
+        view
+        returns (bytes32)
+    {
+        return
+            _hashTypedDataV4(
+                keccak256(
+                    abi.encode(
+                        keccak256(
+                            "NFTVoucher(uint256 tokenId,uint256 minPrice,uint256 amount,string uri,uint256 royaltyPercentage)"
+                        ),
+                        voucher.tokenId,
+                        voucher.minPrice,
+                        voucher.amount,
+                        keccak256(bytes(voucher.uri)),
+                        voucher.royaltyPercentage
+                    )
+                )
+            );
+    }
+
+    function _verify(NFTVoucher calldata voucher, bytes memory signature)
+        internal
+        view
+        returns (address)
+    {
+        bytes32 digest = _hash(voucher);
+        address f = ECDSA.recover(digest, signature);
+        return f;
     }
 }

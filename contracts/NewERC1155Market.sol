@@ -136,6 +136,37 @@ contract NewERC1155Market is ERC1155Holder, ReentrancyGuard, Ownable, EIP712 {
         return itemId;
     }
 
+    function createMarketItemlazy(
+        uint256 tokenId,
+        uint256 price,
+        uint256 amount,
+        address seller
+    ) public payable nonReentrant returns (uint256) {
+        require(price > 0, "price must be greater than 0");
+        _itemIds.increment();
+        uint256 itemId = _itemIds.current();
+        idToMarketItem[itemId] = MarketItem(
+            itemId,
+            tokenId,
+            payable(seller),
+            price,
+            false,
+            true,
+            amount
+        );
+
+        //external call
+
+        emit MarketItemCreated(
+            itemId,
+            tokenId,
+            msg.sender,
+            price,
+            block.timestamp
+        );
+        return itemId;
+    }
+
     function changeMarketItemPrice(uint256 _itemId, uint256 _newPrice) public {
         MarketItem storage _marketItem = idToMarketItem[_itemId];
         require(_marketItem.isActive, "Invalid market item");
@@ -149,11 +180,11 @@ contract NewERC1155Market is ERC1155Holder, ReentrancyGuard, Ownable, EIP712 {
         emit MarketItemPriceChanged(_itemId, _newPrice);
     }
 
-    function createMarketSale(
-        uint256 itemId,
-        uint256 amount,
-        bytes memory data
-    ) public payable nonReentrant {
+    function createMarketSale(uint256 itemId, uint256 amount)
+        public
+        payable
+        nonReentrant
+    {
         MarketItem storage marketItem = idToMarketItem[itemId];
 
         uint256 price = marketItem.price * amount;
@@ -212,7 +243,7 @@ contract NewERC1155Market is ERC1155Holder, ReentrancyGuard, Ownable, EIP712 {
             msg.sender,
             _tokenId,
             amount,
-            data
+            ""
         );
 
         emit MoneyTransferred(msg.sender, marketItem.seller, remaining);
@@ -263,5 +294,28 @@ contract NewERC1155Market is ERC1155Holder, ReentrancyGuard, Ownable, EIP712 {
             );
         }
         return _itemIds.current();
+    }
+
+    function buylazyitem(
+        NewERC1155lazy.NFTVoucher calldata voucher,
+        bytes memory signature,
+        uint256 amount
+    ) external payable {
+        require(
+            msg.value == voucher.minPrice * amount,
+            "Insufficient funds to redeem"
+        );
+
+        (uint256 id, address signer) = ERC1155lazyContract.mintandApproveMarket(
+            voucher,
+            signature
+        );
+        uint256 Id = createMarketItemlazy(
+            id,
+            voucher.minPrice,
+            voucher.amount,
+            signer
+        );
+        createMarketSale(Id, amount);
     }
 }
