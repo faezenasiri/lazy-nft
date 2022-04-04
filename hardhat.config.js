@@ -14,7 +14,7 @@ module.exports = {
     // Infura
        url: "https://rinkeby.infura.io/v3/a8b52e4b2b824890a2c335a55c3df3c6",
      
-      accounts: ["9aefa31005f2be2da94fa10f7fad080b636dd136e33a278711608086bfd9ac2e"]
+      accounts: ["77ed6233fae9569ca20610f62b3d1def7a43002883aa4cf3b6a0d1e1732ec56c"]
     },
     /*
     matic: {

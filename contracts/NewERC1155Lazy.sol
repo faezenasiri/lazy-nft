@@ -65,7 +65,7 @@ contract NewERC1155Lazy is Ownable, ERC1155Burnable, IERC2981, EIP712 {
         uint256 amount,
         string memory url,
         uint256 royaltyPercentage
-    ) external {
+    ) public {
         _tokenIds.increment();
         uint256 id = _tokenIds.current();
         _mint(_msgSender(), id, amount, "");
