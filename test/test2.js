@@ -8,7 +8,7 @@ describe('ERC1155Market', function () {
   describe('createmarketitem', function () {
     before(async function() {
         
-    const Lazy1155 = await ethers.getContractFactory("NewERC1155lazy")
+    const Lazy1155 = await ethers.getContractFactory("NewERC1155Lazy")
     this.lazy1155 = await Lazy1155.deploy()
     await this.lazy1155.deployed()
 
@@ -80,7 +80,7 @@ describe('ERC1155Market', function () {
 
     before(async function() {
         
-    const Lazy1155 = await ethers.getContractFactory("NewERC1155lazy")
+    const Lazy1155 = await ethers.getContractFactory("NewERC1155Lazy")
     this.lazy1155 = await Lazy1155.deploy()
     await this.lazy1155.deployed()
 
@@ -132,7 +132,7 @@ describe('ERC1155Market', function () {
 
     before(async function() {
         
-    const Lazy1155 = await ethers.getContractFactory("NewERC1155lazy")
+    const Lazy1155 = await ethers.getContractFactory("NewERC1155Lazy")
     this.lazy1155 = await Lazy1155.deploy()
     await this.lazy1155.deployed()
 
@@ -177,7 +177,7 @@ describe('ERC1155Market', function () {
           {tokenId,minPrice,amount,uri,royaltyPercentage},
         );
         let value = ethers.utils.parseUnits(0.01.toString(),'ether')
-        await (this.lazy1155Market.connect(this.accounts[2]).buylazyitem( {tokenId,minPrice,amount,uri,royaltyPercentage}, signature,10,{value: value}))
+        await (this.lazy1155Market.connect(this.accounts[2]).buyLazyItem( {tokenId,minPrice,amount,uri,royaltyPercentage}, signature,10,{value: value}))
         expect(await this.lazy1155.balanceOf(this.accounts[2].address,1)).to.equal(10);
 
       });
@@ -215,7 +215,7 @@ describe('ERC1155Market', function () {
           {tokenId,minPrice,amount,uri,royaltyPercentage},
         );
         
-        await (this.lazy1155Market.connect(this.accounts[2]).buylazyitem( {tokenId,minPrice,amount,uri,royaltyPercentage}, signature,3,{value: minPrice*3}))
+        await (this.lazy1155Market.connect(this.accounts[2]).buyLazyItem( {tokenId,minPrice,amount,uri,royaltyPercentage}, signature,3,{value: minPrice*3}))
         expect(await this.lazy1155.balanceOf(this.accounts[2].address,2)).to.equal(3);
         expect(await this.lazy1155.balanceOf(this.lazy1155Market.address,2)).to.equal(7);
 

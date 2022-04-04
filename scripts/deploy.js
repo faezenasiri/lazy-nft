@@ -6,7 +6,7 @@ async function main() {
 
 
 
-  const NewERC1155lazy = await hre.ethers.getContractFactory("NewERC1155lazy");
+  const NewERC1155lazy = await hre.ethers.getContractFactory("NewERC1155Lazy");
   const NEWERC1155lazy = await NewERC1155lazy.deploy();
   await NEWERC1155lazy.deployed();
   console.log("lazy deployed to:", NEWERC1155lazy.address);

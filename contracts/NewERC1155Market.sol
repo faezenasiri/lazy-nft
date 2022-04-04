@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "./NewERC1155lazy.sol";
+import "./NewERC1155Lazy.sol";
 
 contract NewERC1155Market is ERC1155Holder, ReentrancyGuard, Ownable, EIP712 {
     using Counters for Counters.Counter;
@@ -14,7 +14,7 @@ contract NewERC1155Market is ERC1155Holder, ReentrancyGuard, Ownable, EIP712 {
     Counters.Counter internal _itemIds;
     Counters.Counter internal _itemsSold;
 
-    NewERC1155lazy internal ERC1155lazyContract;
+    NewERC1155Lazy internal ERC1155LazyContract;
     uint8 internal marketPlaceShare;
 
     mapping(uint256 => MarketItem) internal idToMarketItem;
@@ -28,6 +28,9 @@ contract NewERC1155Market is ERC1155Holder, ReentrancyGuard, Ownable, EIP712 {
         bool isActive;
         uint256 amount;
     }
+
+    string public name;
+    string public symbol;
     // +EVENTS --------------------------------------------------
     event MoneyTransferred(address from, address to, uint256 amount);
     event NFTTransferred(
@@ -51,20 +54,10 @@ contract NewERC1155Market is ERC1155Holder, ReentrancyGuard, Ownable, EIP712 {
         uint256 amount
     );
     event MarketItemPriceChanged(uint256 itemId, uint256 newPrice);
-    string public name;
-    string public symbol;
 
     constructor() EIP712("Name", "1.0.0") {
         name = "nft";
         symbol = "nft";
-    }
-
-    function initToken(
-        address _NFTationContract,
-        uint8 marketPlaceSharePercentage
-    ) public onlyOwner {
-        ERC1155lazyContract = NewERC1155lazy(_NFTationContract);
-        marketPlaceShare = marketPlaceSharePercentage;
     }
 
     function changeMarketPlaceShare(uint8 _marketPlaceShare)
@@ -74,21 +67,28 @@ contract NewERC1155Market is ERC1155Holder, ReentrancyGuard, Ownable, EIP712 {
         marketPlaceShare = _marketPlaceShare;
     }
 
-    function getMarketShareAndRoyalty(uint256 tokenId, uint256 price)
-        private
-        view
-        returns (
-            uint256 marketShareAmount,
-            uint256 royaltyAmount,
-            address creator
-        )
-    {
-        marketShareAmount = ((marketPlaceShare * price) / 100);
-        (creator, royaltyAmount) = ERC1155lazyContract.royaltyInfo(
-            tokenId,
-            price
+    function buyLazyItem(
+        NewERC1155Lazy.NFTVoucher calldata voucher,
+        bytes memory signature,
+        uint256 amount
+    ) external payable {
+        (uint256 id, address signer) = ERC1155LazyContract
+            .mintAndTransferMarket(voucher, signature);
+        uint256 Id = createMarketItemlazy(
+            id,
+            voucher.minPrice,
+            voucher.amount,
+            signer
         );
-        return (marketShareAmount, royaltyAmount, creator);
+        createMarketSale(Id, amount);
+    }
+
+    function initToken(
+        address _NFTationContract,
+        uint8 marketPlaceSharePercentage
+    ) public onlyOwner {
+        ERC1155LazyContract = NewERC1155Lazy(_NFTationContract);
+        marketPlaceShare = marketPlaceSharePercentage;
     }
 
     function getMarketItemPrice(uint256 _marketItemId)
@@ -118,7 +118,7 @@ contract NewERC1155Market is ERC1155Holder, ReentrancyGuard, Ownable, EIP712 {
         );
 
         //external call
-        ERC1155lazyContract.safeTransferFrom(
+        ERC1155LazyContract.safeTransferFrom(
             msg.sender,
             address(this),
             tokenId,
@@ -238,7 +238,7 @@ contract NewERC1155Market is ERC1155Holder, ReentrancyGuard, Ownable, EIP712 {
         (sent, ) = payable(marketItem.seller).call{value: remaining}("");
         require(sent);
 
-        ERC1155lazyContract.safeTransferFrom(
+        ERC1155LazyContract.safeTransferFrom(
             address(this),
             msg.sender,
             _tokenId,
@@ -277,7 +277,7 @@ contract NewERC1155Market is ERC1155Holder, ReentrancyGuard, Ownable, EIP712 {
             );
 
             //external call
-            ERC1155lazyContract.safeBatchTransferFrom(
+            ERC1155LazyContract.safeBatchTransferFrom(
                 msg.sender,
                 address(this),
                 tokenIds,
@@ -296,21 +296,20 @@ contract NewERC1155Market is ERC1155Holder, ReentrancyGuard, Ownable, EIP712 {
         return _itemIds.current();
     }
 
-    function buylazyitem(
-        NewERC1155lazy.NFTVoucher calldata voucher,
-        bytes memory signature,
-        uint256 amount
-    ) external payable {
-        (uint256 id, address signer) = ERC1155lazyContract.mintandApproveMarket(
-            voucher,
-            signature
+    function getMarketShareAndRoyalty(uint256 tokenId, uint256 price)
+        private
+        view
+        returns (
+            uint256 marketShareAmount,
+            uint256 royaltyAmount,
+            address creator
+        )
+    {
+        marketShareAmount = ((marketPlaceShare * price) / 100);
+        (creator, royaltyAmount) = ERC1155LazyContract.royaltyInfo(
+            tokenId,
+            price
         );
-        uint256 Id = createMarketItemlazy(
-            id,
-            voucher.minPrice,
-            voucher.amount,
-            signer
-        );
-        createMarketSale(Id, amount);
+        return (marketShareAmount, royaltyAmount, creator);
     }
 }

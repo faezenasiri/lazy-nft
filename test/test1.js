@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-describe("NewERC1155lazy", function() {
+describe("NewERC1155Lazy", function() {
     before(async function() {
     this.accounts = await ethers.getSigners();
   });
@@ -8,7 +8,7 @@ describe("NewERC1155lazy", function() {
   
 
   it("Should works!", async function() {
-    const Lazy1155 = await ethers.getContractFactory("NewERC1155lazy")
+    const Lazy1155 = await ethers.getContractFactory("NewERC1155Lazy")
     const lazy1155 = await Lazy1155.deploy()
     await lazy1155.deployed()
     
