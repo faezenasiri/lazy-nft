@@ -8,7 +8,7 @@ import {
   ERC1155addr,ERC1155Marketaddr
 } from '../config'
 
-import NewERC1155lazy from '../artifacts/contracts/NewERC1155lazy.sol/NewERC1155lazy.json'
+import NewERC1155lazy from '../artifacts/contracts/NewERC1155Lazy.sol/NewERC1155Lazy.json'
 import NewERC1155Market from '../artifacts/contracts/NewERC1155Market.sol/NewERC1155Market.json'
 
 

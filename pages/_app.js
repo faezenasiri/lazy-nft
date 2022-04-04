@@ -26,7 +26,7 @@ function Marketplace({ Component, pageProps }) {
               Create1155
             </a>
           </Link>
-          <Link href="/buy1155">
+          <Link href="/newbuy1155">
             <a className="mr-6 text-pink-500">
               Buy1155
             </a>

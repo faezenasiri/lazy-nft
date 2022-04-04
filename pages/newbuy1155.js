@@ -8,7 +8,6 @@ import {
   ERC1155addr,ERC1155Marketaddr
 } from '../config'
 
-import NewERC1155lazy from '../artifacts/contracts/NewERC1155lazy.sol/NewERC1155lazy.json'
 import NewERC1155Market from '../artifacts/contracts/NewERC1155Market.sol/NewERC1155Market.json'
 
 
@@ -160,21 +159,21 @@ if (x == chainId ) {
                
                   <div className="p-4">
                   
-                    <a style={{ height: '64px' }} className="text-2xl font-semibold"><p>{nft.name}</p></a>
+                    <a style={{ height: '64px' }} className="text-2xl font-semibold"><p>name: {nft.name}</p></a>
                      
                  
                   </div>
 
   <div className="p-4">
                   
-                    <a style={{ height: '64px' }} className="text-2xl font-semibold"><p>{nft.price}</p></a>
+                    <a style={{ height: '64px' }} className="text-2xl font-semibold"><p>price:{nft.price}</p></a>
                      
                  
                   </div>
 
                 <div className="p-4">
                   
-                    <a style={{ height: '64px' }} className="text-2xl font-semibold"><p>{nft.amountLeft}</p></a>
+                    <a style={{ height: '64px' }} className="text-2xl font-semibold"><p>amountleft:{nft.amountLeft}</p></a>
                      
                  
                   </div>
