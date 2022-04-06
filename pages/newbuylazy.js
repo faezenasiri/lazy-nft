@@ -75,7 +75,9 @@ if (x == chainId ) {
       }
       return item
     }))
-    setNfts(items)
+    let itemss = items.reverse()
+    setNfts(itemss)
+    
   
   }
 

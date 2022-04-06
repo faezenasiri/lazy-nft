@@ -74,6 +74,9 @@ if (x == chainId ) {
       }
       return item
     }))
+
+        let itemss = items.reverse()
+    setNfts(itemss)
     setNfts(items)
   
   }
@@ -185,15 +188,13 @@ if (x == chainId ) {
                 onChange={e => updateFormInput({ ...formInput, amount: e.target.value })}
                 />
 
-                 {1 && <div className="p-4 bg-black">
+                 {nft.amountLeft && <div className="p-4 bg-black">
                     <p className="text-2xl mb-4 font-bold text-white">{nft.price} ETH</p>
 
                     
                     <button className="w-full bg-pink-500 text-white font-bold py-2 px-12 rounded" onClick={() => buyNft(nft)}>Buy</button>
                   </div>}
-                  {nft.sold && <div className="p-4 bg-black">
-                    <p className=" text-white">owner: {nft.sig} </p>    
-                  </div>}
+                
                 </div>
               ))
           }
